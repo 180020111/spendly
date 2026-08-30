@@ -1,6 +1,7 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
+from werkzeug.security import generate_password_hash
 
-from database.db import get_db, init_db, seed_db
+from database.db import get_db, init_db, seed_db, get_user_by_email, create_user
 
 app = Flask(__name__)
 
@@ -18,14 +19,44 @@ def landing():
     return render_template("landing.html")
 
 
-@app.route("/register")
+@app.route("/register", methods=["GET", "POST"])
 def register():
-    return render_template("register.html")
+    if request.method == "GET":
+        return render_template("register.html")
+
+    name = request.form.get("name", "").strip()
+    email = request.form.get("email", "").strip()
+    password = request.form.get("password", "")
+    confirm_password = request.form.get("confirm_password", "")
+
+    if not name or not email or not password or not confirm_password:
+        return render_template(
+            "register.html", error="All fields are required.", name=name, email=email
+        )
+
+    if password != confirm_password:
+        return render_template(
+            "register.html", error="Passwords do not match.", name=name, email=email
+        )
+
+    if get_user_by_email(email) is not None:
+        return render_template(
+            "register.html",
+            error="An account with that email already exists.",
+            name=name,
+            email=email,
+        )
+
+    password_hash = generate_password_hash(password)
+    create_user(name, email, password_hash)
+    return redirect(url_for("login", registered=1))
 
 
 @app.route("/login")
 def login():
-    return render_template("login.html")
+    registered = request.args.get("registered")
+    success = "Account created successfully. Please sign in." if registered else None
+    return render_template("login.html", success=success)
 
 
 @app.route("/terms")
