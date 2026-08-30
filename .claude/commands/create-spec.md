@@ -5,7 +5,7 @@ allowed-tools: Read, Write, Glob, Bash(git:*)
 ---
 
 You are a senior developer spinning up a new feature for the
-Spendly expense tracker. Always follow the rules in CLAUDE.md.
+Spendly expense tracker. Always follow the rules in CLAUDE.md
 
 User input: $ARGUMENTS
 
