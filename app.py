@@ -4,6 +4,12 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from database.db import get_db, init_db, seed_db, get_user_by_email, create_user
+from database.queries import (
+    get_user_by_id,
+    get_summary_stats,
+    get_recent_transactions,
+    get_category_breakdown,
+)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
@@ -11,6 +17,15 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-producti
 with app.app_context():
     init_db()
     seed_db()
+
+
+def _compute_initials(name):
+    parts = [p for p in name.strip().split() if p]
+    if not parts:
+        return ""
+    if len(parts) == 1:
+        return parts[0][0].upper()
+    return (parts[0][0] + parts[1][0]).upper()
 
 
 # ------------------------------------------------------------------ #
@@ -107,33 +122,30 @@ def profile():
     if not session.get("user_id"):
         return redirect(url_for("login"))
 
+    user_id = session["user_id"]
+    db_user = get_user_by_id(user_id)
     user = {
-        "name": "Demo User",
-        "email": "demo@spendly.com",
-        "initials": "DU",
-        "member_since": "March 2024",
+        "name": db_user["name"],
+        "email": db_user["email"],
+        "initials": _compute_initials(db_user["name"]),
+        "member_since": db_user["member_since"],
     }
 
-    stats = {
-        "total_spent": 18240,
-        "transaction_count": 34,
-        "top_category": "Food",
-    }
+    # === SUBAGENT-STATS START ===
+    stats = get_summary_stats(user_id)
+    # === SUBAGENT-STATS END ===
 
-    transactions = [
-        {"date": "2026-08-20", "description": "Coffee and lunch", "category": "Food", "amount": 8.50},
-        {"date": "2026-08-17", "description": "Miscellaneous", "category": "Other", "amount": 15.00},
-        {"date": "2026-08-14", "description": "New shoes", "category": "Shopping", "amount": 60.20},
-        {"date": "2026-08-11", "description": "Movie tickets", "category": "Entertainment", "amount": 22.75},
-        {"date": "2026-08-08", "description": "Pharmacy", "category": "Health", "amount": 45.00},
-    ]
+    # === SUBAGENT-TRANSACTIONS START ===
+    transactions = get_recent_transactions(user_id)
+    # === SUBAGENT-TRANSACTIONS END ===
 
+    # === SUBAGENT-CATEGORIES START ===
+    raw_categories = get_category_breakdown(user_id)
     categories = [
-        {"name": "Food", "total": 6820, "percent": 72},
-        {"name": "Bills", "total": 4310, "percent": 50},
-        {"name": "Shopping", "total": 2890, "percent": 38},
-        {"name": "Transport", "total": 1740, "percent": 22},
+        {"name": c["name"], "total": c["amount"], "percent": c["pct"]}
+        for c in raw_categories
     ]
+    # === SUBAGENT-CATEGORIES END ===
 
     return render_template(
         "profile.html",

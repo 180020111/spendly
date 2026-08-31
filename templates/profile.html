@@ -22,7 +22,7 @@
     <div class="mock-stats profile-stats">
       <div class="mock-stat">
         <span class="mock-stat-label"><i data-lucide="wallet" class="stat-icon"></i>Total spent</span>
-        <span class="mock-stat-value">₹{{ "{:,.0f}".format(stats.total_spent) }}</span>
+        <span class="mock-stat-value">₹{{ "{:,.2f}".format(stats.total_spent) }}</span>
       </div>
       <div class="mock-stat">
         <span class="mock-stat-label"><i data-lucide="receipt" class="stat-icon"></i>Transactions</span>
@@ -53,6 +53,10 @@
             <td><span class="category-badge category-badge-{{ txn.category|lower }}">{{ txn.category }}</span></td>
             <td class="profile-table-amount">₹{{ "{:,.2f}".format(txn.amount) }}</td>
           </tr>
+          {% else %}
+          <tr>
+            <td colspan="4" class="profile-empty">No transactions yet — add your first expense to see it here.</td>
+          </tr>
           {% endfor %}
         </tbody>
       </table>
@@ -69,6 +73,8 @@
           </div>
           <span class="profile-breakdown-total">₹{{ "{:,.0f}".format(cat.total) }}</span>
         </div>
+        {% else %}
+        <p class="profile-empty">No expenses yet — your category breakdown will appear here.</p>
         {% endfor %}
       </div>
     </div>
