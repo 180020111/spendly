@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Your Profile — Spendly{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="profile-section">
+  <div class="profile-container">
+
+    <div class="profile-card">
+      <div class="profile-avatar">{{ user.initials }}</div>
+      <div class="profile-info">
+        <h1 class="profile-name">{{ user.name }}</h1>
+        <p class="profile-email"><i data-lucide="mail" class="profile-icon"></i>{{ user.email }}</p>
+        <p class="profile-member-since"><i data-lucide="calendar" class="profile-icon"></i>Member since {{ user.member_since }}</p>
+      </div>
+    </div>
+
+    <div class="mock-stats profile-stats">
+      <div class="mock-stat">
+        <span class="mock-stat-label"><i data-lucide="wallet" class="stat-icon"></i>Total spent</span>
+        <span class="mock-stat-value">₹{{ "{:,.0f}".format(stats.total_spent) }}</span>
+      </div>
+      <div class="mock-stat">
+        <span class="mock-stat-label"><i data-lucide="receipt" class="stat-icon"></i>Transactions</span>
+        <span class="mock-stat-value">{{ stats.transaction_count }}</span>
+      </div>
+      <div class="mock-stat">
+        <span class="mock-stat-label"><i data-lucide="tag" class="stat-icon"></i>Top category</span>
+        <span class="mock-stat-value">{{ stats.top_category }}</span>
+      </div>
+    </div>
+
+    <div class="profile-panel">
+      <h2 class="profile-panel-title"><i data-lucide="list" class="panel-icon"></i>Recent transactions</h2>
+      <table class="profile-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th class="profile-table-amount">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for txn in transactions %}
+          <tr>
+            <td>{{ txn.date }}</td>
+            <td>{{ txn.description }}</td>
+            <td><span class="category-badge category-badge-{{ txn.category|lower }}">{{ txn.category }}</span></td>
+            <td class="profile-table-amount">₹{{ "{:,.2f}".format(txn.amount) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="profile-panel">
+      <h2 class="profile-panel-title"><i data-lucide="pie-chart" class="panel-icon"></i>Category breakdown</h2>
+      <div class="mock-bars profile-breakdown">
+        {% for cat in categories %}
+        <div class="mock-bar-row">
+          <span class="mock-cat">{{ cat.name }}</span>
+          <div class="mock-bar-track">
+            <div class="mock-bar" style="--pct: {{ cat.percent }}%"></div>
+          </div>
+          <span class="profile-breakdown-total">₹{{ "{:,.0f}".format(cat.total) }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}
