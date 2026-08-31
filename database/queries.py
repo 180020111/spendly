@@ -140,3 +140,20 @@ def get_category_breakdown(user_id, date_from=None, date_to=None):
     diff = 100 - sum(item["pct"] for item in result)
     result[0]["pct"] += diff  # largest category (first row, amount-desc) absorbs the rounding remainder
     return result
+
+
+def insert_expense(user_id, amount, category, date, description):
+    """Insert a new expense row for user_id and return its id.
+    description is stored as NULL when None or blank.
+    """
+    conn = get_db()
+    try:
+        cursor = conn.execute(
+            "INSERT INTO expenses (user_id, amount, category, date, description) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (user_id, amount, category, date, description or None),
+        )
+        conn.commit()
+        return cursor.lastrowid
+    finally:
+        conn.close()

@@ -1,0 +1,108 @@
+.analytics-section {
+    min-height: calc(100vh - 60px - 100px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+}
+
+.analytics-card {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    max-width: 480px;
+    background: var(--paper-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 3rem 2.5rem;
+    text-align: center;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.06);
+}
+
+.analytics-card::before,
+.analytics-card::after {
+    content: "";
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: var(--paper-warm);
+    z-index: 0;
+}
+
+.analytics-card::before { top: -60px; right: -60px; }
+.analytics-card::after { bottom: -60px; left: -60px; }
+
+.analytics-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.analytics-icon {
+    width: 4.5rem;
+    height: 4.5rem;
+    margin: 0 auto 1.75rem;
+    background: var(--accent);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.analytics-icon-glyph {
+    width: 28px;
+    height: 28px;
+    color: var(--paper);
+}
+
+.analytics-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--paper);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.5rem 1.25rem;
+    border-radius: 999px;
+    margin-bottom: 1.5rem;
+}
+
+.analytics-title {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 1.85rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+}
+
+.analytics-body {
+    font-size: 0.95rem;
+    color: var(--ink-muted);
+    line-height: 1.6;
+    max-width: 340px;
+    margin: 0 auto 1.75rem;
+}
+
+.analytics-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+}
+
+.analytics-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+}
+
+.analytics-dot:nth-child(2) { opacity: 0.6; }
+.analytics-dot:nth-child(3) { opacity: 0.35; }
+
+.analytics-caption {
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+}

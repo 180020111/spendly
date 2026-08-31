@@ -65,6 +65,22 @@
     margin-bottom: 1.25rem;
 }
 
+.profile-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+}
+
+.profile-panel-header .profile-panel-title {
+    margin-bottom: 0;
+}
+
+.profile-add-expense-btn {
+    padding: 0.4rem 1rem;
+    font-size: 0.82rem;
+}
+
 .profile-table {
     width: 100%;
     border-collapse: collapse;
