@@ -19,6 +19,32 @@
       </div>
     </div>
 
+    <div class="profile-filter-bar">
+      {% if error %}
+      <div class="auth-error profile-filter-error">{{ error }}</div>
+      {% endif %}
+
+      <div class="profile-filter-presets">
+        <a href="{{ url_for('profile', date_from=presets.this_month[0], date_to=presets.this_month[1]) }}"
+           class="filter-pill {% if active_preset == 'this_month' %}filter-pill-active{% endif %}">This Month</a>
+        <a href="{{ url_for('profile', date_from=presets.last_3_months[0], date_to=presets.last_3_months[1]) }}"
+           class="filter-pill {% if active_preset == 'last_3_months' %}filter-pill-active{% endif %}">Last 3 Months</a>
+        <a href="{{ url_for('profile', date_from=presets.last_6_months[0], date_to=presets.last_6_months[1]) }}"
+           class="filter-pill {% if active_preset == 'last_6_months' %}filter-pill-active{% endif %}">Last 6 Months</a>
+        <a href="{{ url_for('profile') }}"
+           class="filter-pill {% if active_preset == 'all_time' %}filter-pill-active{% endif %}">All Time</a>
+      </div>
+
+      <form method="GET" action="{{ url_for('profile') }}"
+            class="profile-filter-custom {% if active_preset is none %}profile-filter-custom-active{% endif %}">
+        <label for="date_from" class="profile-filter-label">From</label>
+        <input type="date" id="date_from" name="date_from" class="profile-filter-input" value="{{ date_from or '' }}">
+        <label for="date_to" class="profile-filter-label">To</label>
+        <input type="date" id="date_to" name="date_to" class="profile-filter-input" value="{{ date_to or '' }}">
+        <button type="submit" class="btn-primary profile-filter-apply">Apply</button>
+      </form>
+    </div>
+
     <div class="mock-stats profile-stats">
       <div class="mock-stat">
         <span class="mock-stat-label"><i data-lucide="wallet" class="stat-icon"></i>Total spent</span>
