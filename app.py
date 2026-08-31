@@ -1,4 +1,5 @@
 import os
+from datetime import date, datetime
 
 from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -26,6 +27,34 @@ def _compute_initials(name):
     if len(parts) == 1:
         return parts[0][0].upper()
     return (parts[0][0] + parts[1][0]).upper()
+
+
+def _parse_date(value):
+    """Parse a YYYY-MM-DD string into a date, or None if missing/invalid."""
+    if not value:
+        return None
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except ValueError:
+        return None
+
+
+def _first_of_month_n_back(today, n):
+    """The first day of the month that is n calendar months before today's month."""
+    total_months = today.year * 12 + (today.month - 1) - n
+    year, month = divmod(total_months, 12)
+    return date(year, month + 1, 1)
+
+
+def _preset_ranges():
+    """Quick-select date ranges for the profile filter bar, as ISO strings."""
+    today = date.today()
+    iso = lambda d: d.strftime("%Y-%m-%d")
+    return {
+        "this_month": (iso(_first_of_month_n_back(today, 0)), iso(today)),
+        "last_3_months": (iso(_first_of_month_n_back(today, 2)), iso(today)),
+        "last_6_months": (iso(_first_of_month_n_back(today, 5)), iso(today)),
+    }
 
 
 # ------------------------------------------------------------------ #
@@ -131,16 +160,39 @@ def profile():
         "member_since": db_user["member_since"],
     }
 
+    parsed_from = _parse_date(request.args.get("date_from"))
+    parsed_to = _parse_date(request.args.get("date_to"))
+
+    error = None
+    if parsed_from and parsed_to and parsed_from > parsed_to:
+        error = "Start date must be before end date."
+        parsed_from = parsed_to = None
+    elif (parsed_from is None) != (parsed_to is None):
+        # A one-sided range can't drive a BETWEEN filter — treat it as absent.
+        parsed_from = parsed_to = None
+
+    date_from = parsed_from.strftime("%Y-%m-%d") if parsed_from else None
+    date_to = parsed_to.strftime("%Y-%m-%d") if parsed_to else None
+
+    presets = _preset_ranges()
+    if date_from and date_to:
+        active_preset = next(
+            (name for name, rng in presets.items() if rng == (date_from, date_to)),
+            None,
+        )
+    else:
+        active_preset = "all_time"
+
     # === SUBAGENT-STATS START ===
-    stats = get_summary_stats(user_id)
+    stats = get_summary_stats(user_id, date_from=date_from, date_to=date_to)
     # === SUBAGENT-STATS END ===
 
     # === SUBAGENT-TRANSACTIONS START ===
-    transactions = get_recent_transactions(user_id)
+    transactions = get_recent_transactions(user_id, date_from=date_from, date_to=date_to)
     # === SUBAGENT-TRANSACTIONS END ===
 
     # === SUBAGENT-CATEGORIES START ===
-    raw_categories = get_category_breakdown(user_id)
+    raw_categories = get_category_breakdown(user_id, date_from=date_from, date_to=date_to)
     categories = [
         {"name": c["name"], "total": c["amount"], "percent": c["pct"]}
         for c in raw_categories
@@ -153,6 +205,11 @@ def profile():
         stats=stats,
         transactions=transactions,
         categories=categories,
+        date_from=date_from,
+        date_to=date_to,
+        presets=presets,
+        active_preset=active_preset,
+        error=error,
     )
 
 
