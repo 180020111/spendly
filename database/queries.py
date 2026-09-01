@@ -200,3 +200,20 @@ def update_expense(expense_id, user_id, amount, category, date, description):
         return cursor.rowcount
     finally:
         conn.close()
+
+
+def delete_expense(expense_id, user_id):
+    """Delete an expense row scoped to both id and user_id. Returns the
+    number of rows affected (0 if the expense does not exist or isn't
+    owned by user_id — nothing is deleted in that case).
+    """
+    conn = get_db()
+    try:
+        cursor = conn.execute(
+            "DELETE FROM expenses WHERE id = ? AND user_id = ?",
+            (expense_id, user_id),
+        )
+        conn.commit()
+        return cursor.rowcount
+    finally:
+        conn.close()
