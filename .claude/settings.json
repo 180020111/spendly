@@ -1,0 +1,26 @@
+{
+    "hooks": {
+        "PostToolUse": [
+            {
+                "matcher": "Write|Edit",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "python3 -c \"\nimport sys, json, subprocess\ndata = json.load(sys.stdin)\nfile = data.get('tool_input', {}).get('file_path', '')\nif file.endswith('.py'):\n    subprocess.run(['python3', '-m', 'black', '--quiet', file])\n\""
+                    }
+                ]
+            }
+        ],
+        "PreToolUse": [
+            {
+                "matcher": "Bash",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "python3 /Users/tarunsaini/Documents/expense-tracker/.claude/hooks/protect_db.py"
+                    }
+                ]
+            }
+        ]
+    }
+}

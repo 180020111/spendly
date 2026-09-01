@@ -108,6 +108,29 @@
     color: var(--ink);
 }
 
+.profile-table-actions {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.profile-edit-link {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.profile-edit-link:hover {
+    text-decoration: underline;
+}
+
+.profile-edit-link .profile-icon {
+    color: var(--accent);
+    margin-right: 0.3rem;
+}
+
 .category-badge {
     display: inline-block;
     padding: 0.25rem 0.65rem;

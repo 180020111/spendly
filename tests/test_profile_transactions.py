@@ -9,7 +9,7 @@ def test_get_recent_transactions_seed_user_returns_all_ordered_newest_first(app)
     dates = [t["date"] for t in txns]
     assert dates == sorted(dates, reverse=True)
     for t in txns:
-        assert set(t.keys()) == {"date", "description", "category", "amount"}
+        assert set(t.keys()) == {"id", "date", "description", "category", "amount"}
 
 
 def test_get_recent_transactions_respects_limit(app):
