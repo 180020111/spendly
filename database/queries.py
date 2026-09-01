@@ -75,7 +75,7 @@ def get_summary_stats(user_id, date_from=None, date_to=None):
 # STUB — Subagent A implements this. Do not touch any other function.   #
 # --------------------------------------------------------------------- #
 def get_recent_transactions(user_id, limit=10, date_from=None, date_to=None):
-    """List of {"date","description","category","amount"}, newest-first, capped at limit.
+    """List of {"id","date","description","category","amount"}, newest-first, capped at limit.
     [] if no expenses. When date_from and date_to are both given, results are
     scoped to that inclusive range; the limit still applies.
     """
@@ -83,21 +83,21 @@ def get_recent_transactions(user_id, limit=10, date_from=None, date_to=None):
     try:
         if date_from and date_to:
             rows = conn.execute(
-                "SELECT date, description, category, amount FROM expenses "
+                "SELECT id, date, description, category, amount FROM expenses "
                 "WHERE user_id = ? AND date BETWEEN ? AND ? "
                 "ORDER BY date DESC, id DESC LIMIT ?",
                 (user_id, date_from, date_to, limit),
             ).fetchall()
         else:
             rows = conn.execute(
-                "SELECT date, description, category, amount FROM expenses "
+                "SELECT id, date, description, category, amount FROM expenses "
                 "WHERE user_id = ? ORDER BY date DESC, id DESC LIMIT ?",
                 (user_id, limit),
             ).fetchall()
     finally:
         conn.close()
     return [
-        {"date": r["date"], "description": r["description"], "category": r["category"], "amount": r["amount"]}
+        {"id": r["id"], "date": r["date"], "description": r["description"], "category": r["category"], "amount": r["amount"]}
         for r in rows
     ]
 
@@ -155,5 +155,48 @@ def insert_expense(user_id, amount, category, date, description):
         )
         conn.commit()
         return cursor.lastrowid
+    finally:
+        conn.close()
+
+
+def get_expense_by_id(expense_id, user_id):
+    """Return {"id","amount","category","date","description"} for expense_id
+    if it belongs to user_id, or None if it doesn't exist or belongs to
+    someone else.
+    """
+    conn = get_db()
+    try:
+        row = conn.execute(
+            "SELECT id, amount, category, date, description FROM expenses "
+            "WHERE id = ? AND user_id = ?",
+            (expense_id, user_id),
+        ).fetchone()
+    finally:
+        conn.close()
+    if row is None:
+        return None
+    return {
+        "id": row["id"],
+        "amount": row["amount"],
+        "category": row["category"],
+        "date": row["date"],
+        "description": row["description"],
+    }
+
+
+def update_expense(expense_id, user_id, amount, category, date, description):
+    """Update an existing expense row scoped to both id and user_id.
+    description is stored as NULL when None or blank. Returns the number of
+    rows affected (0 if the expense does not exist or isn't owned by user_id).
+    """
+    conn = get_db()
+    try:
+        cursor = conn.execute(
+            "UPDATE expenses SET amount = ?, category = ?, date = ?, description = ? "
+            "WHERE id = ? AND user_id = ?",
+            (amount, category, date, description or None, expense_id, user_id),
+        )
+        conn.commit()
+        return cursor.rowcount
     finally:
         conn.close()
